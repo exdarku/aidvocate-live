@@ -1,0 +1,131 @@
+.login-page, .register-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #1C1D28;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: var(--text-inverse);
+  position: relative;
+}
+.login-page {
+  background-image: url('/src/assets/Login-Background.png');
+}
+.register-page {
+  background-image: url('/src/assets/Registration-Background.png');
+}
+.login-page::after, .register-page::after {
+  position: absolute;
+  content: '';
+  inset: 0;
+  background: linear-gradient(to top right, rgba(33,33,33,0.84) 60%, rgba(66,66,66,0.24) 100%);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+.login-page > *, .register-page > * { margin: 50px; }
+.login-container, .register-container {
+  width: 100%; max-width: 460px;
+  min-height: 75vh;
+  padding: 2rem;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: var(--text-inverse);
+  margin: 0 1rem;
+  color: var(--text-primary);
+  z-index: 2;
+}
+.login-container h1, .register-container h1 {
+  font-weight: 500; font-size: 25px;
+}
+.login-container .form-group, .register-container .form-group {
+  margin: 1.5rem 0 1rem 0; position: relative;
+}
+.login-container .form-group label, .register-container .form-group label {
+  display: block; padding: 3px 5px; font-size: 12px;
+  background-color: var(--text-inverse);
+  position: absolute; left: 15px; top: -12px;
+  color: var(--text-fade);
+}
+.login-container .form-group input,
+.login-container .form-group select,
+.register-container .form-group input,
+.register-container .form-group select {
+  width: 100%; padding: 0.8rem;
+  border: 2px solid var(--text-fade);
+  background: none; border-radius: 8px;
+  font-size: 1rem;
+}
+.login-container .form-group input:focus,
+.register-container .form-group input:focus {
+  color: var(--text-primary);
+  border: 2px solid var(--text-primary);
+  outline: none;
+}
+.form-group .eye {
+  position: absolute; right: 15px; top: 50%;
+  transform: translateY(-50%); cursor: pointer;
+  width: 20px;
+}
+.login-container .align {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.login-container .align .remember-me {
+  display: flex; align-items: center; gap: 6px;
+}
+.login-container .align .remember-me input[type="checkbox"] {
+  width: 18px; height: 18px;
+}
+.login-container .align .remember-me label {
+  position: static;
+  padding: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.login-container .align a {
+  color: var(--text-primary); font-weight: 500;
+}
+.login-container .btn, .register-container .btn {
+  width: 100%; padding: 0.8rem;
+  margin: 16px 0;
+  background-color: var(--text-primary);
+  border: none; border-radius: 8px;
+  color: var(--text-inverse);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.login-container .division {
+  width: 100%; margin: 28px 0;
+  position: relative;
+}
+.login-container .division p {
+  position: absolute;
+  background-color: var(--text-inverse);
+  left: 50%; top: -12px;
+  transform: translateX(-50%);
+  width: 50px; text-align: center;
+}
+.login-container .sign-up, .register-container .login {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 15px;
+  display: flex; justify-content: center; align-items: center; gap: 5px;
+}
+.login-container .sign-up a, .register-container .login a {
+  color: var(--text-primary); font-weight: bold;
+}
+.carousel-indicators {
+  display: flex; gap: 20px; align-items: center;
+}
+.carousel-indicators .indicator {
+  width: 40px; height: 1px;
+  border: solid var(--text-inverse-secondary) 1px;
+}
+.carousel-indicators .indicator.active {
+  width: 50px; border: solid var(--text-inverse) 3px;
+}

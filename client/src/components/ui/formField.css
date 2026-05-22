@@ -1,0 +1,81 @@
+.form-field {
+  position: relative;
+  margin-top: var(--space-6);
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--text-fade);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: border-color var(--duration-fast) var(--ease);
+}
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--text-primary);
+}
+
+.form-field input::placeholder {
+  color: transparent;
+}
+
+.form-field label {
+  position: absolute;
+  left: 12px;
+  top: var(--space-3);
+  padding: 0 var(--space-1);
+  font-size: var(--text-base);
+  color: var(--text-fade);
+  background-color: var(--text-inverse);
+  pointer-events: none;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+/* Float label up when focused or filled */
+.form-field input:focus + label,
+.form-field input:not(:placeholder-shown) + label,
+.form-field select:focus + label,
+.form-field select:not([value=""]):not(:invalid) + label {
+  top: -8px;
+  font-size: var(--text-xs);
+  color: var(--text-primary);
+}
+
+.form-field--error input,
+.form-field--error select {
+  border-color: var(--brand-heart);
+}
+
+.form-field__eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+}
+.form-field__eye img { width: 20px; height: 20px; display: block; }
+
+.form-field__hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-1);
+  margin-left: var(--space-2);
+}
+.form-field__error {
+  font-size: var(--text-xs);
+  color: var(--brand-heart);
+  margin-top: var(--space-1);
+  margin-left: var(--space-2);
+}
+
+/* Convenience group spacing */
+.form-group { display: flex; flex-direction: column; }

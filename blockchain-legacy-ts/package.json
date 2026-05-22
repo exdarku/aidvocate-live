@@ -1,0 +1,21 @@
+{
+  "name": "@aidvocate/blockchain",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:mumbai": "hardhat run scripts/deploy.ts --network mumbai",
+    "deploy:polygon": "hardhat run scripts/deploy.ts --network polygon",
+    "verify": "hardhat verify --network mumbai",
+    "clean": "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@types/node": "^22.8.6",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.15",
+    "typescript": "^5.6.3"
+  }
+}

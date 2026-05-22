@@ -1,0 +1,9 @@
+{
+  "filter_paths": ["node_modules"],
+  "exclude_informational": false,
+  "exclude_low": false,
+  "json": "slither-report.json",
+  "solc_remaps": [
+    "@openzeppelin=node_modules/@openzeppelin"
+  ]
+}

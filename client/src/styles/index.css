@@ -1,0 +1,260 @@
+@import './variables.css';
+@import './base.css';
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   Base Styles
+   ============================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background-main);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =============================================
+   Typography
+   ============================================= */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+}
+
+/* =============================================
+   Custom Utilities
+   ============================================= */
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .text-hero {
+    font-size: var(--text-hero);
+  }
+
+  /* Card hover effect from original design */
+  .card-hover {
+    transition: transform var(--transition-slow), box-shadow var(--transition-slow);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Button hover effect */
+  .btn-hover:hover {
+    filter: brightness(0.9);
+  }
+
+  /* Image overlay for cards */
+  .img-overlay {
+    position: relative;
+  }
+
+  .img-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    filter: contrast(0.3);
+  }
+
+  /* Truncate text */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Container with max-width */
+  .container-main {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-lg);
+  }
+
+  /* Scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+    border-radius: var(--radius-full);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--brand-main);
+    border-radius: var(--radius-full);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+}
+
+/* =============================================
+   Component Base Styles
+   ============================================= */
+
+@layer components {
+  /* Primary Button */
+  .btn-primary {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    background-color: var(--brand-secondary);
+    color: var(--brand-main);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(0.9);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    background-color: var(--brand-main);
+    color: var(--text-inverse);
+  }
+
+  .btn-secondary:hover {
+    filter: brightness(1.1);
+  }
+
+  /* Outline Button */
+  .btn-outline {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 border-2;
+    border-color: var(--brand-main);
+    color: var(--brand-main);
+    background: transparent;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--brand-main);
+    color: var(--text-inverse);
+  }
+
+  /* Input Field */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
+    border-color: var(--background-secondary);
+    background-color: white;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--brand-secondary);
+    box-shadow: 0 0 0 3px rgba(252, 211, 132, 0.2);
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-xl overflow-hidden;
+    background-color: white;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-primary {
+    background-color: var(--brand-secondary);
+    color: var(--brand-main);
+  }
+
+  .badge-outline {
+    border: 1px solid var(--brand-secondary);
+    color: var(--brand-main);
+    background: transparent;
+  }
+}
+
+/* =============================================
+   Animation Keyframes
+   ============================================= */
+
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =============================================
+   Responsive Adjustments
+   ============================================= */
+
+@media (max-width: 500px) {
+  :root {
+    --text-hero: 15vw;
+    --navbar-height: 8vh;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,16 @@
+.card {
+  background-color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease),
+              box-shadow var(--duration-base) var(--ease);
+}
+.card--p-none { padding: 0; }
+.card--p-sm { padding: var(--space-4); }
+.card--p-md { padding: var(--space-6); }
+.card--p-lg { padding: var(--space-8); }
+.card--hoverable { cursor: pointer; }
+.card--hoverable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}

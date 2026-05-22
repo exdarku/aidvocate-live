@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Legacy Prisma (server-legacy-ts/)
+server-legacy-ts/prisma/*.db
+server-legacy-ts/prisma/*.db-journal
+
+# Thesis SQLite DB
+server/src/aidvocate.db
+server/src/aidvocate.db-*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv/
+*.egg-info/
+.eggs/
+*.egg
+
+# Contracts (Hardhat artifacts)
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+
+# Circuits build artifacts
+circuits/build/
+
+# Misc
+*.pem
+.vercel

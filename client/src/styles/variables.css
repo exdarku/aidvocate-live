@@ -1,0 +1,119 @@
+/* =============================================
+   AidVocate Theme Variables
+   Following design from existing Aidvocate project
+   ============================================= */
+
+:root {
+  /* Background Colors */
+  --background-main: #FAF3DD;
+  --background-secondary: #E4DDC7;
+
+  /* Brand Colors */
+  --brand-main: #1C1D28;
+  --brand-color: #2B303B;
+  --brand-secondary: #FCD384;
+  --brand-secondary-light: rgba(255, 245, 235, 0.9);
+  --brand-heart: #E25656;
+
+  /* Text Colors */
+  --text-primary: #131313;
+  --text-secondary: #2A2A2A;
+  --text-tertiary: #615858;
+  --text-fade: rgba(87, 81, 74, 0.55);
+  --text-inverse: #FEFFF6;
+  --text-inverse-secondary: #D9D9D9;
+
+  /* Status Colors */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+  --radius-card: 15px;
+  --radius-button: 23px;
+  --radius-pill: 105px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Z-Index Scale */
+  --z-dropdown: 100;
+  --z-sticky: 500;
+  --z-modal-backdrop: 900;
+  --z-modal: 1000;
+  --z-nav: 9999;
+  --z-toast: 10000;
+  --z-tooltip: 10001;
+
+  /* Typography */
+  --font-poppins: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-bebas-neue: 'Bebas Neue', sans-serif;
+  --font-kadwa: 'Kadwa', serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-zen: 'Zen Kaku Gothic Antique', sans-serif;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-hero: 100px;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Navbar Height */
+  --navbar-height: 10vh;
+
+  /* Container Max Width */
+  --container-max: 1200px;
+
+  /* Card Dimensions */
+  --card-max-width: 400px;
+  --card-height: 580px;
+  --event-card-max-width: 1100px;
+  --event-card-height: 360px;
+}
+
+/* Dark Mode (optional - can enable later) */
+[data-theme="dark"] {
+  --background-main: #1C1D28;
+  --background-secondary: #2A2B38;
+  --text-primary: #FEFFF6;
+  --text-secondary: #B0B0B0;
+  --text-inverse: #131313;
+}

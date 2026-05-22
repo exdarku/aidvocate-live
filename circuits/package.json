@@ -1,0 +1,16 @@
+{
+  "name": "@aidvocate/circuits",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "compile": "bash scripts/compile-circuit.sh",
+    "setup": "bash scripts/trusted-setup.sh",
+    "prove": "bash scripts/generate-proof.sh",
+    "verify": "bash scripts/verify-proof.sh",
+    "export-verifier": "bash scripts/export-verifier.sh"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7"
+  }
+}

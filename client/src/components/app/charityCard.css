@@ -1,0 +1,84 @@
+.charity-card {
+  width: 100%;
+  max-width: 400px;
+  height: 580px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: var(--text-primary);
+  background-color: var(--text-inverse);
+  display: flex;
+  flex-direction: column;
+}
+.charity-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+.charity-card .background {
+  width: 100%;
+  height: 266px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.charity-card .background::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: black; opacity: 0.4; z-index: 0;
+}
+.charity-card .background .categories {
+  position: absolute; bottom: 16px; left: 0; right: 0;
+  text-align: left; z-index: 1; padding: 0 1.6vw;
+}
+.charity-card .background .categories p {
+  display: inline-block; margin: 2px; font-size: 10px;
+  border: solid var(--brand-secondary) 1px; border-radius: 105px;
+  padding: 1.15px 10.51px; color: var(--text-inverse);
+  background-color: var(--text-fade);
+}
+.charity-card .description {
+  text-align: left;
+  margin: 24px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.charity-card .description .text-wrapper {
+  display: flex; justify-content: space-between;
+}
+.charity-card .description .text-wrapper h3 { font-weight: 600; font-size: 22px; }
+.charity-card .description .text-wrapper img { width: 24px; height: 24px; }
+.charity-card .description p.charity-description {
+  font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;
+}
+.charity-card .description .contribution {
+  display: flex; gap: 5px; align-items: center;
+  color: var(--text-primary); font-size: 14px;
+}
+.charity-card .description .contribution img { width: 26px; height: 26px; }
+.charity-card .description .engagements {
+  margin-top: auto;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.charity-card .description .engagements img.like {
+  width: 26px; height: 24px; cursor: pointer;
+}
+.charity-card .description .engagements .buttons {
+  display: flex; gap: 5px;
+}
+.charity-card .description .engagements .buttons button {
+  background-color: var(--brand-secondary);
+  padding: 10px 20px; border: none;
+  display: flex; justify-content: center; align-items: center;
+}
+.charity-card .description .engagements .buttons .donate {
+  border-radius: 50%; width: 50px; height: 50px; padding: 0;
+}
+.charity-card .description .engagements .buttons .donate img { width: 25px; }
+.charity-card .description .engagements .buttons .volunteer {
+  border-radius: 23px; font-weight: 500;
+  text-decoration: underline; font-size: 13px;
+}

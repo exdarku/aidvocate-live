@@ -1,0 +1,285 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// Enums
+// =============================================
+
+enum UserRole {
+  DONOR
+  NGO
+  ADMIN
+}
+
+enum DonationStatus {
+  PENDING
+  PAYMENT_INITIATED
+  PAYMENT_CONFIRMED
+  BLOCKCHAIN_RECORDED
+  NGO_CONFIRMED
+  COMPLETED
+  DISPUTED
+  FAILED
+}
+
+enum VerificationAction {
+  APPROVE
+  FLAG
+  BLOCK
+  REVIEW
+}
+
+// =============================================
+// User Model
+// =============================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         UserRole @default(DONOR)
+  avatarUrl    String?
+  kycVerified  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  donations            Donation[]
+  likedCharities       CharityLike[]
+  likedEvents          EventLike[]
+  eventParticipations  EventParticipant[]
+  managedCharity       Charity?           @relation("CharityManager")
+  refreshTokens        RefreshToken[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+// =============================================
+// Charity Model
+// =============================================
+
+model Charity {
+  id               String   @id @default(uuid())
+  name             String
+  description      String   @db.Text
+  shortDescription String?
+  imageUrl         String?
+  categories       String[]
+  walletAddress    String?  // Blockchain address for on-chain tracking
+  bankAccount      String?
+  gcashNumber      String?
+  verified         Boolean  @default(false)
+  totalRaised      Decimal  @default(0) @db.Decimal(15, 2)
+  totalVolunteers  Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Manager relation
+  managerId String? @unique
+  manager   User?   @relation("CharityManager", fields: [managerId], references: [id])
+
+  // Relations
+  donations Donation[]
+  events    Event[]
+  likes     CharityLike[]
+
+  @@index([name])
+  @@index([verified])
+}
+
+model CharityLike {
+  id        String   @id @default(uuid())
+  userId    String
+  charityId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, charityId])
+  @@index([charityId])
+}
+
+// =============================================
+// Donation Model
+// =============================================
+
+model Donation {
+  id               String         @id @default(uuid())
+  reference        String         @unique // REF-YYYYMMDD-XXXXX
+  amount           Decimal        @db.Decimal(15, 2)
+  currency         String         @default("PHP")
+  purpose          String?
+  status           DonationStatus @default(PENDING)
+  paymentMethod    String?        // GCASH, PAYMAYA, BANK
+  paymentTxId      String?        // Payment gateway transaction ID
+  blockchainTxHash String?        // Polygon transaction hash
+  confidenceScore  Float?         // MTCS score (0-1)
+  riskScore        Float?         // DPAD score (0-1)
+  riskFlags        String[]       // Array of DPAD flags
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  paidAt           DateTime?
+
+  // Relations
+  donorId   String
+  donor     User    @relation(fields: [donorId], references: [id])
+  charityId String
+  charity   Charity @relation(fields: [charityId], references: [id])
+
+  blockchainRecord BlockchainRecord?
+  fraudAnalysis    FraudAnalysis?
+
+  @@index([reference])
+  @@index([status])
+  @@index([donorId])
+  @@index([charityId])
+  @@index([createdAt])
+}
+
+model BlockchainRecord {
+  id              String   @id @default(uuid())
+  txHash          String   @unique
+  blockNumber     Int
+  contractAddress String
+  network         String   @default("polygon-mumbai")
+  donorHash       String   // Hashed donor identifier for privacy
+  ngoAddress      String
+  amountCentavos  BigInt
+  recordedAt      DateTime @default(now())
+
+  donationId String   @unique
+  donation   Donation @relation(fields: [donationId], references: [id])
+
+  @@index([txHash])
+}
+
+model FraudAnalysis {
+  id                 String             @id @default(uuid())
+  riskScore          Float
+  confidenceScore    Float
+  flags              String[]
+  recommendedAction  VerificationAction
+  velocityCount      Int                @default(0)
+  accountAgeDays     Int                @default(0)
+  mlAnomalyScore     Float?
+  verificationLevel  String
+  analysisDetails    Json?
+  analyzedAt         DateTime           @default(now())
+
+  donationId String   @unique
+  donation   Donation @relation(fields: [donationId], references: [id])
+}
+
+// =============================================
+// Event Model
+// =============================================
+
+model Event {
+  id              String   @id @default(uuid())
+  name            String
+  description     String   @db.Text
+  imageUrl        String?
+  location        String
+  startDate       DateTime
+  endDate         DateTime
+  maxParticipants Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  charityId    String
+  charity      Charity            @relation(fields: [charityId], references: [id])
+  participants EventParticipant[]
+  likes        EventLike[]
+
+  @@index([charityId])
+  @@index([startDate])
+}
+
+model EventParticipant {
+  id       String   @id @default(uuid())
+  userId   String
+  eventId  String
+  joinedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+}
+
+model EventLike {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+}
+
+// =============================================
+// Oracle Metrics (for ATRS algorithm)
+// =============================================
+
+model OracleMetrics {
+  id                      String   @id @default(uuid())
+  oracleId                String   @unique
+  oracleName              String
+  totalVerifications      Int      @default(0)
+  successfulVerifications Int      @default(0)
+  avgResponseTimeMs       Float    @default(0)
+  uptimeLast30Days        Float    @default(100)
+  falsePositives          Int      @default(0)
+  consensusParticipations Int      @default(0)
+  correctConsensus        Int      @default(0)
+  trustScore              Float    @default(0.5)
+  lastUpdated             DateTime @updatedAt
+
+  @@index([oracleId])
+  @@index([trustScore])
+}
+
+// =============================================
+// System Configuration
+// =============================================
+
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}

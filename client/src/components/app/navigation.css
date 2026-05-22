@@ -1,0 +1,103 @@
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--brand-main);
+  padding: 12px 30px;
+  width: 100%;
+  height: 10vh;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+nav .logo-link { display: flex; align-items: center; }
+nav .logo-link img { width: 140px; height: auto; }
+nav .separator {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+}
+nav .nav-links {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; justify-content: center; margin-right: 10px;
+}
+nav .nav-links a {
+  color: var(--text-inverse); text-decoration: none;
+  font-size: 14px; font-weight: 500; padding: 8px 12px;
+  border-radius: 6px; transition: all 0.3s ease;
+}
+nav .nav-links a:hover { background-color: rgba(255,255,255,0.1); }
+nav .nav-icons { display: flex; align-items: center; gap: 15px; }
+.icon-btn {
+  display: flex; align-items: center; background: none; border: none;
+  cursor: pointer; padding: 8px; border-radius: 50%;
+  color: var(--text-inverse);
+}
+.icon-btn:hover { background-color: rgba(255,255,255,0.1); }
+.profile-btn { position: relative; padding: 4px; }
+.profile-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-inverse); font-size: 14px; font-weight: 600;
+  border: 2px solid var(--text-inverse);
+}
+.burger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-inverse);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease);
+}
+.burger:hover { background-color: rgba(255, 255, 255, 0.1); }
+.burger svg { display: block; width: 24px; height: 24px; }
+.profile-menu-container { position: relative; }
+.profile-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--brand-main); border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  min-width: 280px; z-index: 1000; padding: 0;
+  border: 1px solid #3a3d4a;
+}
+.profile-menu-header {
+  padding: 20px; display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+}
+.profile-menu-avatar {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px; font-weight: 600;
+  margin-bottom: 12px; border: 3px solid #ffffff;
+}
+.profile-menu-info h3 { color: #fff; font-size: 14px; font-weight: 600; margin: 0; }
+.profile-menu-divider { border: none; height: 1px; background: #3a3d4a; margin: 0; }
+.profile-menu-items { padding: 8px 0; }
+.profile-menu-item {
+  display: flex; align-items: center; padding: 12px 20px;
+  color: #ffffff; text-decoration: none; font-size: 14px;
+  font-weight: 500; border: none; background: none;
+  width: 100%; cursor: pointer; text-align: left;
+}
+.profile-menu-item:hover { background-color: rgba(255,255,255,0.08); }
+.logout-item:hover { background-color: rgba(239, 68, 68, 0.1); }
+@media (max-width: 900px) {
+  nav { padding: 12px 20px; }
+  /* On mobile, push the trailing nav-icons + burger group to the right. */
+  nav .separator { justify-content: flex-end; gap: 8px; }
+  nav .burger { display: block; order: 2; }
+  nav .nav-icons { order: 1; }
+  nav .nav-links {
+    display: none; flex-direction: column; position: absolute;
+    top: 100%; left: 0; right: 0; background: var(--brand-main);
+    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    gap: 15px; width: 100%;
+  }
+  nav .nav-links.active { display: flex; }
+  nav .nav-links a { padding: 12px 16px; border-radius: 8px; width: 100%; }
+}

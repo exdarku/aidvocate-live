@@ -1,0 +1,48 @@
+/* Lumina design tokens + base reset */
+:root {
+  --background-main: #FAF3DD;
+  --background-secondary: #E4DDC7;
+
+  --brand-main: #1C1D28;
+  --brand-color: #2B303B;
+  --brand-secondary: #FCD384;
+  --brand-secondary-light: rgba(255, 245, 235, 0.9);
+  --brand-heart: #E25656;
+
+  --text-primary: #131313;
+  --text-secondary: #2A2A2A;
+  --text-tertiary: #615858;
+  --text-fade: rgba(87, 81, 74, 0.55);
+  --text-inverse: #FEFFF6;
+  --text-inverse-secondary: #D9D9D9;
+
+  --font-poppins: "Poppins", system-ui, -apple-system, sans-serif;
+  --font-bebas-neue: "Bebas Neue", "Poppins", sans-serif;
+  --font-kadwa: "Kadwa", serif;
+  --font-zen-kaku-gothic-antique: "Zen Kaku Gothic Antique", serif;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-poppins);
+  scroll-behavior: smooth;
+}
+
+body, html, #root {
+  background-color: var(--background-main);
+  min-height: 100%;
+  width: 100%;
+}
+
+button:hover {
+  filter: brightness(0.9);
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

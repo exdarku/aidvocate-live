@@ -1,0 +1,25 @@
+{
+  "name": "@aidvocate/backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
+    "circomlibjs": "^0.1.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "snarkjs": "^0.7.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
