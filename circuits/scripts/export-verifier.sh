@@ -3,7 +3,7 @@
 # Run INSIDE Docker: docker compose run --rm dev bash packages/circuits/scripts/export-verifier.sh
 set -e
 
-cd packages/circuits
+cd "$(dirname "$0")/.."
 
 echo "Exporting Solidity verifier..."
 snarkjs zkey export solidityverifier build/DonationVerifier.zkey build/Groth16Verifier.sol

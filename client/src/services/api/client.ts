@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { User } from './types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 /* Storage keys are kept stable so existing sessions survive renames. */
 const TOKEN_KEY = 'aidvocate_thesis_token';

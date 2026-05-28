@@ -4,7 +4,7 @@ import type { MerkleProof, Donation } from './api';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const snarkjs: any = await import('snarkjs');
 
-const THESIS_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const THESIS_API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export interface ZkProof {
   pi_a: string[];

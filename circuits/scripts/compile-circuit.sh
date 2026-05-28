@@ -3,7 +3,7 @@
 # Run INSIDE Docker: docker compose run --rm dev bash packages/circuits/scripts/compile-circuit.sh
 set -e
 
-cd packages/circuits
+cd "$(dirname "$0")/.."
 mkdir -p build
 
 echo "Compiling DonationVerifier circuit..."

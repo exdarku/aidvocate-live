@@ -3,7 +3,7 @@
 # Run INSIDE Docker: docker compose run --rm dev bash packages/circuits/scripts/trusted-setup.sh
 set -e
 
-cd packages/circuits
+cd "$(dirname "$0")/.."
 PTAU=ptau/pot14.ptau
 
 if [ ! -f "$PTAU" ]; then
