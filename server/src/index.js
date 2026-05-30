@@ -4,7 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
 import { config } from "./config.js";
-import { initDb, closeDb, get } from "./db.js";
+import { closeDb, get } from "./db.js";
 import { notFound, errorHandler } from "./middleware/error.js";
 
 import authRoutes from "./routes/auth.js";
@@ -78,18 +78,11 @@ app.get("/api/health", async (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// Create schema + seed before accepting traffic, then start listening.
-let server;
-initDb()
-  .then(() => {
-    server = app.listen(config.port, () => {
-      console.log(`AidVocate API running on http://localhost:${config.port}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to initialise the database — exiting.", err);
-    process.exit(1);
-  });
+// The schema is managed by `npm run db:migrate` (a deploy step), not on boot,
+// so the app never races on DDL. Just start listening — the pool connects lazily.
+const server = app.listen(config.port, () => {
+  console.log(`AidVocate API running on http://localhost:${config.port}`);
+});
 
 // Graceful shutdown so in-flight requests finish before the process exits.
 function shutdown(signal) {
