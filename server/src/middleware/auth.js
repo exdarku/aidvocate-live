@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { config } from "../config.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aidvocate-dev-secret";
+const JWT_SECRET = config.jwtSecret;
 
 export function authenticate(req, res, next) {
   const header = req.headers.authorization;

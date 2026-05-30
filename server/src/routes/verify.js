@@ -32,7 +32,7 @@ router.get("/artifacts/vkey", (req, res) => {
   res.sendFile(vkeyPath);
 });
 
-router.post("/on-chain", authenticate, async (req, res) => {
+router.post("/on-chain", authenticate, async (req, res, next) => {
   try {
     const { proof, publicSignals, batchId } = req.body;
     if (!proof || !publicSignals || batchId === undefined) {
@@ -42,7 +42,7 @@ router.post("/on-chain", authenticate, async (req, res) => {
     const valid = await verifyProofOnChain(proof, publicSignals, batchId);
     res.json({ valid, batchId });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 

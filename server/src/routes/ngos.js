@@ -1,10 +1,10 @@
 import { Router } from "express";
-import db from "../db.js";
+import { all } from "../db.js";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  const ngos = db.prepare("SELECT id, name, description FROM ngos").all();
+router.get("/", async (req, res) => {
+  const ngos = await all("SELECT id, name, description FROM ngos");
   res.json(ngos);
 });
 

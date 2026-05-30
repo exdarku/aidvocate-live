@@ -1,12 +1,25 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { lazy, Suspense } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
+import { NotFoundPage } from '@/pages/NotFoundPage';
+
+// Lazy + dev-only so the devtools are never bundled into the production build.
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-router-devtools').then((m) => ({
+        default: m.TanStackRouterDevtools,
+      }))
+    )
+  : () => null;
 
 export const Route = createRootRoute({
   component: () => (
     <AuthProvider>
       <Outlet />
-      {import.meta.env.DEV && <TanStackRouterDevtools />}
+      <Suspense>
+        <TanStackRouterDevtools />
+      </Suspense>
     </AuthProvider>
   ),
+  notFoundComponent: NotFoundPage,
 });

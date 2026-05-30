@@ -57,8 +57,8 @@ export async function buildMerkleTree(commitments) {
 
 export async function getMerkleProof(batchId, commitment) {
   // Dynamic import to avoid circular dependency
-  const { default: db } = await import("../db.js");
-  const batch = db.prepare("SELECT * FROM batches WHERE id = ?").get(batchId);
+  const { get } = await import("../db.js");
+  const batch = await get("SELECT * FROM batches WHERE id = ?", [batchId]);
   if (!batch) return null;
 
   const commitments = JSON.parse(batch.commitments);

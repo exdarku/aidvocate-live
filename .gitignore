@@ -48,9 +48,18 @@ coverage/
 server-legacy-ts/prisma/*.db
 server-legacy-ts/prisma/*.db-journal
 
-# Thesis SQLite DB
+# Thesis SQLite DB (lives at server/aidvocate.db — never commit real data)
+server/aidvocate.db
+server/aidvocate.db-*
 server/src/aidvocate.db
 server/src/aidvocate.db-*
+
+# Dead/legacy code (kept locally, excluded from the repo)
+server-legacy-ts/
+blockchain-legacy-ts/
+
+# Large manuscript binary (keep curated docs/ files tracked)
+/Copy of live*.docx
 
 # Python
 __pycache__/

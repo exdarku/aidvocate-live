@@ -1,24 +1,26 @@
 import { Router } from "express";
-import db from "../db.js";
+import { all } from "../db.js";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  const cats = db.prepare("SELECT * FROM categories ORDER BY name").all();
+router.get("/", async (req, res) => {
+  const cats = await all("SELECT * FROM categories ORDER BY name");
   res.json(cats);
 });
 
-router.get("/event/:eventId", (req, res) => {
-  const cats = db.prepare(
-    "SELECT c.* FROM categories c JOIN event_categories ec ON ec.categoryId = c.id WHERE ec.eventId = ?"
-  ).all(req.params.eventId);
+router.get("/event/:eventId", async (req, res) => {
+  const cats = await all(
+    "SELECT c.* FROM categories c JOIN event_categories ec ON ec.categoryId = c.id WHERE ec.eventId = ?",
+    [req.params.eventId]
+  );
   res.json(cats);
 });
 
-router.get("/organization/:organizationId", (req, res) => {
-  const cats = db.prepare(
-    "SELECT c.* FROM categories c JOIN organization_categories oc ON oc.categoryId = c.id WHERE oc.organizationId = ?"
-  ).all(req.params.organizationId);
+router.get("/organization/:organizationId", async (req, res) => {
+  const cats = await all(
+    "SELECT c.* FROM categories c JOIN organization_categories oc ON oc.categoryId = c.id WHERE oc.organizationId = ?",
+    [req.params.organizationId]
+  );
   res.json(cats);
 });
 

@@ -8,6 +8,7 @@ export { SectionTitle } from './SectionTitle';
 export { Loading } from './Loading';
 export { EmptyState } from './EmptyState';
 export { RequireAuth } from './RequireAuth';
+export { ErrorBoundary } from './ErrorBoundary';
 export {
   SearchIcon,
   LockIcon,

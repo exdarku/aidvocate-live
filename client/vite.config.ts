@@ -11,6 +11,18 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext',
+    rollupOptions: {
+      output: {
+        // Split heavy, rarely-changing vendor libs into their own chunks so the
+        // browser caches them across deploys and the initial app bundle shrinks.
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['@tanstack/react-router', '@tanstack/react-query'],
+          ethers: ['ethers'],
+          pdf: ['jspdf', 'html2canvas', 'qrcode'],
+        },
+      },
+    },
   },
   resolve: {
     alias: {

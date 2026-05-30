@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { Toaster } from 'react-hot-toast';
 import { routeTree } from './routeTree.gen';
+import { ErrorBoundary } from '@/components/ui';
 import './styles/index.css';
 
 // Create a new router instance
@@ -29,9 +30,10 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <Toaster
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster
         position="top-center"
         toastOptions={{
           duration: 4000,
@@ -54,7 +56,8 @@ createRoot(document.getElementById('root')!).render(
             },
           },
         }}
-      />
-    </QueryClientProvider>
+        />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

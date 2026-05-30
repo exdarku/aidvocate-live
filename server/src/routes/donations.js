@@ -1,17 +1,32 @@
 import { Router } from "express";
 import crypto from "crypto";
-import db from "../db.js";
+import { z } from "zod";
+import { all, get, run } from "../db.js";
 import { authenticate, tryAuthenticate } from "../middleware/auth.js";
 import { computeCommitment, getMerkleProof } from "../services/merkle.js";
+import { validateBody } from "../middleware/validate.js";
 
 const router = Router();
+
+const createDonationSchema = z.object({
+  ngoId: z.coerce.number().int().positive().optional(),
+  organizationId: z.coerce.number().int().positive().optional(),
+  eventId: z.coerce.number().int().positive().optional(),
+  // Positive, finite, and bounded — guards against NaN, strings, and absurd values.
+  amount: z.coerce.number().positive().max(1_000_000_000),
+  description: z.string().trim().max(1000).optional(),
+  guestName: z.string().trim().max(200).optional(),
+  guestEmail: z.string().trim().email().max(254).optional().or(z.literal("")),
+  guestContact: z.string().trim().max(50).optional(),
+  isAnonymous: z.coerce.boolean().optional(),
+});
 
 /**
  * POST /api/donations
  * Auth: optional. Authenticated users get the donation linked to their account.
  * Guests can donate by providing { guestName, guestEmail, guestContact, isAnonymous }.
  */
-router.post("/", tryAuthenticate, async (req, res) => {
+router.post("/", tryAuthenticate, validateBody(createDonationSchema), async (req, res, next) => {
   try {
     const {
       ngoId,
@@ -25,10 +40,6 @@ router.post("/", tryAuthenticate, async (req, res) => {
       isAnonymous,
     } = req.body;
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Valid positive amount required" });
-    }
-
     const asGuest = !req.user;
     if (asGuest) {
       const anon = isAnonymous === true || isAnonymous === 1;
@@ -41,16 +52,16 @@ router.post("/", tryAuthenticate, async (req, res) => {
 
     let resolvedNgoId = ngoId;
     if (!resolvedNgoId && organizationId) {
-      const org = db.prepare("SELECT ngoId FROM organizations WHERE id = ?").get(organizationId);
+      const org = await get("SELECT ngoId FROM organizations WHERE id = ?", [organizationId]);
       if (org && org.ngoId) resolvedNgoId = org.ngoId;
     }
     if (!resolvedNgoId) {
-      const firstNgo = db.prepare("SELECT id FROM ngos LIMIT 1").get();
+      const firstNgo = await get("SELECT id FROM ngos LIMIT 1");
       if (!firstNgo) return res.status(400).json({ error: "No NGOs configured" });
       resolvedNgoId = firstNgo.id;
     }
 
-    const ngo = db.prepare("SELECT * FROM ngos WHERE id = ?").get(resolvedNgoId);
+    const ngo = await get("SELECT * FROM ngos WHERE id = ?", [resolvedNgoId]);
     if (!ngo) return res.status(404).json({ error: "NGO not found" });
 
     // Poseidon commitment uses donorId 0 for guest donations — recipient/amount/timestamp/salt still uniquely identify it.
@@ -62,33 +73,33 @@ router.post("/", tryAuthenticate, async (req, res) => {
     // Anyone holding the full reference is treated as authorised to view it.
     const paymentReference = crypto.randomBytes(16).toString("hex");
 
-    const stmt = db.prepare(`
-      INSERT INTO donations (
+    const result = await run(
+      `INSERT INTO donations (
         donorId, ngoId, organizationId, eventId, amount, timestamp, salt, commitment,
         paymentStatus, paymentReference, description,
         guestName, guestEmail, guestContact, isAnonymous
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, ?, ?, ?, ?, ?)
-    `);
-    const result = stmt.run(
-      req.user ? req.user.id : null,
-      resolvedNgoId,
-      organizationId || null,
-      eventId || null,
-      amount,
-      timestamp,
-      salt,
-      commitment,
-      paymentReference,
-      description || null,
-      asGuest ? guestName || null : null,
-      asGuest ? guestEmail || null : null,
-      asGuest ? guestContact || null : null,
-      asGuest && (isAnonymous === true || isAnonymous === 1) ? 1 : 0
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, ?, ?, ?, ?, ?)`,
+      [
+        req.user ? req.user.id : null,
+        resolvedNgoId,
+        organizationId || null,
+        eventId || null,
+        amount,
+        timestamp,
+        salt,
+        commitment,
+        paymentReference,
+        description || null,
+        asGuest ? guestName || null : null,
+        asGuest ? guestEmail || null : null,
+        asGuest ? guestContact || null : null,
+        asGuest && (isAnonymous === true || isAnonymous === 1) ? 1 : 0,
+      ]
     );
 
     res.status(201).json({
-      id: result.lastInsertRowid,
+      id: result.insertId,
       commitment,
       salt,
       timestamp,
@@ -98,7 +109,7 @@ router.post("/", tryAuthenticate, async (req, res) => {
       message: "Donation recorded. Save your salt for verification proof.",
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
@@ -112,8 +123,8 @@ router.post("/", tryAuthenticate, async (req, res) => {
  *    own account.
  * Never exposes donor identity or guest contact info in the response.
  */
-router.get("/receipt/:ref", tryAuthenticate, (req, res) => {
-  const row = db.prepare(`
+router.get("/receipt/:ref", tryAuthenticate, async (req, res) => {
+  const row = await get(`
     SELECT
       d.id, d.donorId, d.amount, d.timestamp, d.commitment, d.salt,
       d.batchId, d.paymentStatus, d.paymentReference, d.description,
@@ -126,7 +137,7 @@ router.get("/receipt/:ref", tryAuthenticate, (req, res) => {
     LEFT JOIN organizations o ON d.organizationId = o.id
     LEFT JOIN events e ON d.eventId = e.id
     WHERE d.paymentReference = ?
-  `).get(req.params.ref);
+  `, [req.params.ref]);
   if (!row) return res.status(404).json({ error: "Receipt not found" });
 
   if (req.user) {
@@ -146,8 +157,8 @@ router.get("/receipt/:ref", tryAuthenticate, (req, res) => {
 // Routes below require an authenticated user (they're personal/private).
 router.use(authenticate);
 
-router.get("/", (req, res) => {
-  const donations = db.prepare(`
+router.get("/", async (req, res) => {
+  const donations = await all(`
     SELECT d.*, n.name as ngoName, o.name as organizationName, e.name as eventName
     FROM donations d
     JOIN ngos n ON d.ngoId = n.id
@@ -155,30 +166,30 @@ router.get("/", (req, res) => {
     LEFT JOIN events e ON d.eventId = e.id
     WHERE d.donorId = ?
     ORDER BY d.createdAt DESC
-  `).all(req.user.id);
+  `, [req.user.id]);
   res.json(donations);
 });
 
-router.get("/by-reference/:ref", (req, res) => {
-  const donation = db.prepare(`
+router.get("/by-reference/:ref", async (req, res) => {
+  const donation = await get(`
     SELECT d.*, n.name as ngoName, o.name as organizationName
     FROM donations d
     JOIN ngos n ON d.ngoId = n.id
     LEFT JOIN organizations o ON d.organizationId = o.id
     WHERE d.paymentReference = ? AND d.donorId = ?
-  `).get(req.params.ref, req.user.id);
+  `, [req.params.ref, req.user.id]);
   if (!donation) return res.status(404).json({ error: "Donation not found" });
   res.json(donation);
 });
 
 router.get("/:id", async (req, res) => {
-  const donation = db.prepare(`
+  const donation = await get(`
     SELECT d.*, n.name as ngoName, o.name as organizationName
     FROM donations d
     JOIN ngos n ON d.ngoId = n.id
     LEFT JOIN organizations o ON d.organizationId = o.id
     WHERE d.id = ? AND d.donorId = ?
-  `).get(req.params.id, req.user.id);
+  `, [req.params.id, req.user.id]);
   if (!donation) return res.status(404).json({ error: "Donation not found" });
 
   let merkleProof = null;
