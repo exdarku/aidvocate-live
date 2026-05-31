@@ -1,3 +1,4 @@
+import "dotenv/config";
 import crypto from "crypto";
 import {
   S3Client,
@@ -7,6 +8,7 @@ import {
   HeadBucketCommand,
   PutBucketCorsCommand,
   GetBucketCorsCommand,
+  CreateBucketCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -139,6 +141,40 @@ export const DEFAULT_CORS_ORIGINS = (
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
+
+/**
+ * Create the configured bucket if it doesn't already exist. New buckets keep
+ * S3's default Block Public Access ON (presigned URLs work against private
+ * buckets), so this never makes anything public. Returns whether it created it.
+ */
+export async function ensureBucket() {
+  const c = getClient();
+
+  // Already there and we can see it? Nothing to do.
+  try {
+    await c.send(new HeadBucketCommand({ Bucket: BUCKET }));
+    return { bucket: BUCKET, created: false };
+  } catch (err) {
+    const status = err?.$metadata?.httpStatusCode;
+    // 404 = doesn't exist (create it). 403 = exists but owned by someone else,
+    // or our credentials lack access — creating would fail too, so surface it.
+    if (status && status !== 404) throw err;
+  }
+
+  // us-east-1 must NOT send a LocationConstraint; every other region must.
+  const input = { Bucket: BUCKET };
+  if (REGION !== "us-east-1") {
+    input.CreateBucketConfiguration = { LocationConstraint: REGION };
+  }
+
+  try {
+    await c.send(new CreateBucketCommand(input));
+    return { bucket: BUCKET, created: true, region: REGION };
+  } catch (err) {
+    if (err.name === "BucketAlreadyOwnedByYou") return { bucket: BUCKET, created: false };
+    throw err;
+  }
+}
 
 /** Apply a CORS policy to the bucket allowing the given browser origins. */
 export async function applyBucketCors(origins = DEFAULT_CORS_ORIGINS) {
