@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 
 import { config } from "./config.js";
 import { closeDb, get } from "./db.js";
+import { checkS3Connection } from "./services/s3.js";
 import { notFound, errorHandler } from "./middleware/error.js";
 
 import authRoutes from "./routes/auth.js";
@@ -82,6 +83,17 @@ app.use(errorHandler);
 // so the app never races on DDL. Just start listening — the pool connects lazily.
 const server = app.listen(config.port, () => {
   console.log(`AidVocate API running on http://localhost:${config.port}`);
+
+  // S3 is optional — probe it and log status, but never block/crash startup.
+  checkS3Connection().then((s3) => {
+    if (!s3.configured) {
+      console.log("ℹ️  S3: not configured (media uploads disabled).");
+    } else if (s3.ok) {
+      console.log(`✅ S3: connected to bucket "${s3.bucket}" (${s3.region}).`);
+    } else {
+      console.warn(`⚠️  S3: configured but NOT reachable — ${s3.error}`);
+    }
+  });
 });
 
 // Graceful shutdown so in-flight requests finish before the process exits.

@@ -1,5 +1,13 @@
 import crypto from "crypto";
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+  PutBucketCorsCommand,
+  GetBucketCorsCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REGION = process.env.AWS_REGION || "us-east-1";
@@ -27,6 +35,31 @@ let client;
 /** True when AWS credentials + bucket are configured. */
 export function isS3Configured() {
   return Boolean(BUCKET && ACCESS_KEY_ID && SECRET_ACCESS_KEY);
+}
+
+/**
+ * Actually verify the bucket is reachable with the configured credentials
+ * (a HeadBucket call). Returns a result object rather than throwing so callers
+ * (e.g. startup logging) can decide how to react. S3 is optional, so a failure
+ * here should NOT crash the server.
+ */
+export async function checkS3Connection() {
+  if (!isS3Configured()) {
+    return { configured: false, ok: false, bucket: BUCKET || null };
+  }
+  try {
+    await getClient().send(new HeadBucketCommand({ Bucket: BUCKET }));
+    return { configured: true, ok: true, bucket: BUCKET, region: REGION };
+  } catch (err) {
+    // HeadBucket returns bodiless errors, so lead with the HTTP status which is
+    // the most diagnostic: 403 = bad creds / no access, 404 = bucket missing,
+    // 301 = bucket is in a different region than AWS_REGION.
+    const status = err?.$metadata?.httpStatusCode;
+    const detail = [err.name, status && `HTTP ${status}`, err.message]
+      .filter(Boolean)
+      .join(" — ");
+    return { configured: true, ok: false, bucket: BUCKET, region: REGION, error: detail };
+  }
 }
 
 function getClient() {
@@ -93,6 +126,51 @@ export async function deleteObject(key) {
   if (!key) throw new Error("Object key is required");
   await getClient().send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
   return { key, deleted: true };
+}
+
+/**
+ * Browser origins allowed to upload/download directly against the bucket via
+ * presigned URLs. Overridable with S3_CORS_ORIGINS (comma-separated).
+ */
+export const DEFAULT_CORS_ORIGINS = (
+  process.env.S3_CORS_ORIGINS ||
+  "http://localhost:5173,http://localhost:5174,https://aidvocate.app,https://www.aidvocate.app"
+)
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+/** Apply a CORS policy to the bucket allowing the given browser origins. */
+export async function applyBucketCors(origins = DEFAULT_CORS_ORIGINS) {
+  await getClient().send(
+    new PutBucketCorsCommand({
+      Bucket: BUCKET,
+      CORSConfiguration: {
+        CORSRules: [
+          {
+            AllowedOrigins: origins,
+            // GET for presigned downloads, PUT for presigned uploads, HEAD for metadata.
+            AllowedMethods: ["GET", "PUT", "HEAD"],
+            AllowedHeaders: ["*"],
+            ExposeHeaders: ["ETag"],
+            MaxAgeSeconds: 3000,
+          },
+        ],
+      },
+    })
+  );
+  return { bucket: BUCKET, origins };
+}
+
+/** Read the bucket's current CORS rules (returns [] if none set). */
+export async function getBucketCors() {
+  try {
+    const res = await getClient().send(new GetBucketCorsCommand({ Bucket: BUCKET }));
+    return res.CORSRules || [];
+  } catch (err) {
+    if (err.name === "NoSuchCORSConfiguration") return [];
+    throw err;
+  }
 }
 
 export { ALLOWED_TYPES };

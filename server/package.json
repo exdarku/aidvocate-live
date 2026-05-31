@@ -9,6 +9,7 @@
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
     "db:setup": "npm run db:migrate && npm run db:seed",
+    "s3:cors": "node scripts/s3-cors.js",
     "test": "jest"
   },
   "dependencies": {
