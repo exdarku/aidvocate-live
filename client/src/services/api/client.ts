@@ -49,6 +49,12 @@ apiClient.interceptors.response.use(
       removeToken();
       removeStoredUser();
     }
+    // Surface the backend's human-readable message (e.g. "Wrong credentials")
+    // so UI toasts don't show axios's "Request failed with status code 401".
+    const serverMessage = error.response?.data?.error;
+    if (typeof serverMessage === 'string' && serverMessage) {
+      error.message = serverMessage;
+    }
     return Promise.reject(error);
   }
 );

@@ -7,6 +7,42 @@ import { submitMerkleRoot } from "../services/blockchain.js";
 const router = Router();
 router.use(authenticate);
 
+/**
+ * GET /api/batches — list every batch with its donation count + total amount.
+ * NGO-only: this is the batch-management overview.
+ */
+router.get("/", requireRole("ngo"), async (req, res) => {
+  const batches = await all(`
+    SELECT
+      b.id, b.merkleRoot, b.txHash, b.status, b.createdAt,
+      (SELECT COUNT(*) FROM donations d WHERE d.batchId = b.id) AS donationCount,
+      (SELECT COALESCE(SUM(d.amount), 0) FROM donations d WHERE d.batchId = b.id) AS totalAmount
+    FROM batches b
+    ORDER BY b.id DESC
+  `);
+  res.json(batches);
+});
+
+/**
+ * GET /api/batches/unbatched — donations not yet assigned to a batch, i.e. the
+ * ones the next "Create batch" will sweep up. NGO-only. Defined before "/:id"
+ * so the literal path isn't captured as an id.
+ */
+router.get("/unbatched", requireRole("ngo"), async (req, res) => {
+  const donations = await all(`
+    SELECT
+      d.id, d.amount, d.createdAt, d.paymentReference,
+      n.name AS ngoName, o.name AS organizationName, e.name AS eventName
+    FROM donations d
+    JOIN ngos n ON d.ngoId = n.id
+    LEFT JOIN organizations o ON d.organizationId = o.id
+    LEFT JOIN events e ON d.eventId = e.id
+    WHERE d.batchId IS NULL
+    ORDER BY d.createdAt DESC
+  `);
+  res.json(donations);
+});
+
 router.post("/create", requireRole("ngo"), async (req, res) => {
   const unbatched = await all("SELECT * FROM donations WHERE batchId IS NULL ORDER BY createdAt");
 

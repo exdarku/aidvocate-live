@@ -76,7 +76,7 @@ router.post("/login", validateBody(loginSchema), async (req, res, next) => {
     const valid = user
       ? await bcrypt.compare(password, user.passwordHash)
       : await bcrypt.compare(password, "$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinva");
-    if (!user || !valid) return next(new HttpError(401, "Invalid credentials"));
+    if (!user || !valid) return next(new HttpError(401, "Wrong credentials"));
 
     res.json({
       token: signToken(user),

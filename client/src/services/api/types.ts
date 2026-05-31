@@ -155,6 +155,26 @@ export interface BatchSubmitResult {
   status: string;
 }
 
+export interface BatchListItem {
+  id: number;
+  merkleRoot: string;
+  txHash: string | null;
+  status: string;
+  createdAt: string;
+  donationCount: number;
+  totalAmount: number;
+}
+
+export interface UnbatchedDonation {
+  id: number;
+  amount: number;
+  createdAt: string;
+  paymentReference?: string;
+  ngoName?: string;
+  organizationName?: string | null;
+  eventName?: string | null;
+}
+
 export interface VerifyArtifacts {
   wasmUrl: string;
   zkeyUrl: string;

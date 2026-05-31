@@ -29,6 +29,8 @@ export type {
   LeaderboardEntry,
   BatchSummary,
   BatchSubmitResult,
+  BatchListItem,
+  UnbatchedDonation,
   VerifyArtifacts,
   OnChainVerification,
 } from './types';

@@ -13,6 +13,7 @@ import { Route as VerifyDonationRouteImport } from './routes/verify-donation'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReceiptRouteImport } from './routes/receipt'
 import { Route as PaymentSuccessRouteImport } from './routes/payment-success'
+import { Route as NgoRouteImport } from './routes/ngo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardsRouteImport } from './routes/leaderboards'
 import { Route as EventsRouteImport } from './routes/events'
@@ -42,6 +43,11 @@ const ReceiptRoute = ReceiptRouteImport.update({
 const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
   id: '/payment-success',
   path: '/payment-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NgoRoute = NgoRouteImport.update({
+  id: '/ngo',
+  path: '/ngo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/leaderboards': typeof LeaderboardsRoute
   '/login': typeof LoginRoute
+  '/ngo': typeof NgoRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/receipt': typeof ReceiptRoute
   '/register': typeof RegisterRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/leaderboards': typeof LeaderboardsRoute
   '/login': typeof LoginRoute
+  '/ngo': typeof NgoRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/receipt': typeof ReceiptRoute
   '/register': typeof RegisterRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/leaderboards': typeof LeaderboardsRoute
   '/login': typeof LoginRoute
+  '/ngo': typeof NgoRoute
   '/payment-success': typeof PaymentSuccessRoute
   '/receipt': typeof ReceiptRoute
   '/register': typeof RegisterRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/leaderboards'
     | '/login'
+    | '/ngo'
     | '/payment-success'
     | '/receipt'
     | '/register'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/leaderboards'
     | '/login'
+    | '/ngo'
     | '/payment-success'
     | '/receipt'
     | '/register'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/leaderboards'
     | '/login'
+    | '/ngo'
     | '/payment-success'
     | '/receipt'
     | '/register'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   LeaderboardsRoute: typeof LeaderboardsRoute
   LoginRoute: typeof LoginRoute
+  NgoRoute: typeof NgoRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
   ReceiptRoute: typeof ReceiptRoute
   RegisterRoute: typeof RegisterRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/payment-success'
       fullPath: '/payment-success'
       preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ngo': {
+      id: '/ngo'
+      path: '/ngo'
+      fullPath: '/ngo'
+      preLoaderRoute: typeof NgoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   LeaderboardsRoute: LeaderboardsRoute,
   LoginRoute: LoginRoute,
+  NgoRoute: NgoRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
   ReceiptRoute: ReceiptRoute,
   RegisterRoute: RegisterRoute,

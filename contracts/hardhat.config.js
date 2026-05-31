@@ -10,6 +10,14 @@ export default defineConfig({
     }
   },
   networks: {
+    // Standalone local node started by `npx hardhat node` (JSON-RPC on :8545).
+    // Deploy to it with `--network localhost` so the contract persists for the
+    // backend to talk to.
+    localhost: {
+      type: "http",
+      chainType: "l1",
+      url: process.env.RPC_URL || "http://127.0.0.1:8545"
+    },
     amoy: {
       type: "http",
       chainType: "l1",

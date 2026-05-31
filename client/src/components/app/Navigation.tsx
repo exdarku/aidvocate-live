@@ -93,9 +93,15 @@ export default function Navigation() {
                     <hr className="profile-menu-divider" />
 
                     <div className="profile-menu-items">
-                      <a href="/dashboard" className="profile-menu-item" role="menuitem">
-                        <span>Dashboard</span>
-                      </a>
+                      {user?.role === 'ngo' ? (
+                        <a href="/ngo" className="profile-menu-item" role="menuitem">
+                          <span>NGO Console</span>
+                        </a>
+                      ) : (
+                        <a href="/dashboard" className="profile-menu-item" role="menuitem">
+                          <span>Dashboard</span>
+                        </a>
+                      )}
                       <a href="/donations" className="profile-menu-item" role="menuitem">
                         <span>My Donations</span>
                       </a>
