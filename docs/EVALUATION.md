@@ -111,6 +111,27 @@ Construction is **linear in batch size** and modest — a full 1,024-donation ba
 
 **Verdict:** On-chain scalability is excellent (constant gas per batch, sub-cent cost). Off-chain work is linear and small; the practical throughput ceiling is server-side proof generation and the repeated tree rebuild, both addressable.
 
+### 3.5 Cross-toolchain comparison (ZoKrates, Noir, PLONK)
+
+**Date:** 2026-06-06. The same donation-verification statement (Poseidon-5 commitment + depth-10 Poseidon-2 Merkle path → public root) was implemented and benchmarked in three additional framework/proving-system combinations alongside the production Circom+Groth16 pipeline. Ports: `circuits/zokrates/DonationVerifier.zok`, `circuits/noir/src/main.nr`; pipelines: `circuits/scripts/docker-{plonk,zokrates,noir}-pipeline.sh` (5 timed runs per stage, mean reported). The ZoKrates/Noir ports return the computed root as a public output instead of asserting a public input — semantically identical binding.
+
+| | Circom + Groth16 (§3.2) | Circom + PLONK | ZoKrates + Groth16 | Noir + UltraHonk |
+|---|---|---|---|---|
+| Versions | circom 2.1.9, snarkjs 0.7.6 | same | ZoKrates 0.8.8 | nargo 1.0.0-beta.6, bb 0.84.0 |
+| Container | amd64 (QEMU) | amd64 (QEMU) | amd64 (QEMU) | **native arm64** |
+| Constraints | 2,751 R1CS | 32,063 PLONK rows | 2,752 R1CS | 3,664 ACIR opcodes (10,606 gates) |
+| Trusted setup | per-circuit (Phase 2) | universal (pot16) | per-circuit | none |
+| Setup time | — (one-off ceremony) | ~3,776 ms | ~206 ms | n/a |
+| Witness | ~395 ms | shared with Groth16 | ~74 ms | ~126 ms |
+| Prove | ~3.6 s | ~21.1 s | ~238 ms | ~170 ms* |
+| Verify (CLI) | ~2.9 s | ~1.23 s | ~55 ms | ~17 ms |
+| Proof size | 807 B | 2,245 B | 849 B | 14,080 B |
+| **On-chain verify gas** | **218,720** (via AidVocate) | **293,366** (bare verifier) | not measured | not measured |
+
+\* First Noir prove run was 3,967 ms (one-time SRS download); warm-run mean reported.
+
+Notes: (1) emulated-container timings are conservative upper bounds and not directly comparable to the native-arm64 Noir run; gas, constraint counts, and proof sizes are platform-independent. (2) All three ports compute the **identical Merkle root** to the Circom circuit — the ZoKrates stdlib and noir-lang/poseidon implementations are circomlib-compatible. (3) PLONK's universal setup avoids the per-circuit ceremony (F1) but costs ~2.8× proof size and ~34% more verification gas than Groth16 — consistent with the design choice of Groth16 for the production stack. (4) The PLONK verifier was deployed and exercised on-chain (`contracts/test/plonk-verify.test.js`): valid proof accepted, tampered public signal rejected.
+
 ---
 
 ## 4. Security Analysis
