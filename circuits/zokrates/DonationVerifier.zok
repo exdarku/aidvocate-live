@@ -1,0 +1,36 @@
+// ZoKrates port of DonationVerifier.circom (depth-10 Poseidon Merkle proof).
+// Same statement as the Circom circuit: prove knowledge of donation fields +
+// salt whose Poseidon(5) commitment sits in a Merkle tree under a public root.
+//
+// Deviation from the Circom version (documented in the benchmark design):
+// the computed root is RETURNED as a public output rather than asserted
+// against a public input — semantically identical binding (the verifier sees
+// the root either way), and it sidesteps any cross-stdlib Poseidon-constant
+// mismatch when preparing inputs. ZoKrates' stdlib Poseidon is the circomlib
+// construction, so the returned root should equal the Circom pipeline's.
+import "hashes/poseidon/poseidon" as poseidon;
+
+def main(
+    private field donorId,
+    private field amount,
+    private field ngoId,
+    private field timestamp,
+    private field salt,
+    private field[10] pathElements,
+    private field[10] pathIndices
+) -> field {
+    // commitment = Poseidon(5 donation fields)
+    field commitment = poseidon([donorId, amount, ngoId, timestamp, salt]);
+
+    field mut node = commitment;
+    for u32 i in 0..10 {
+        field idx = pathIndices[i];
+        // Constrain path index to binary (mirrors the Circom constraint)
+        assert(idx * (1 - idx) == 0);
+        // Conditional left/right swap, fully constrained
+        field left = node + idx * (pathElements[i] - node);
+        field right = pathElements[i] + idx * (node - pathElements[i]);
+        node = poseidon([left, right]);
+    }
+    return node;
+}
