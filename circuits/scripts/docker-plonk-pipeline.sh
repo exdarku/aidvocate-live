@@ -14,7 +14,6 @@ set -e
 cd /src
 export NODE_OPTIONS=--max-old-space-size=4096
 CIRCOM_VER=v2.1.9
-SNARKJS="npx --yes snarkjs@0.7.6"
 OUT=build/plonk
 mkdir -p "$OUT"
 
@@ -27,12 +26,24 @@ if ! command -v circom >/dev/null 2>&1; then
 fi
 circom --version
 
-echo "### 1. Install circomlib"
+echo "### 1. Install circomlib + snarkjs"
+# Prefer a host-installed snarkjs (pure JS, mounted at /src/node_modules) —
+# npm/npx inside the QEMU-emulated container is slow and occasionally hangs.
 if [ ! -d node_modules/circomlib ]; then
   npm init -y >/dev/null 2>&1 || true
   npm install --no-audit --no-fund circomlib@2.0.5 >/dev/null 2>&1
 fi
-echo "circomlib installed"
+if [ -f node_modules/snarkjs/cli.js ]; then
+  SNARKJS="node node_modules/snarkjs/cli.js"
+else
+  mkdir -p /tmp/snarkjs-local && cd /tmp/snarkjs-local
+  npm init -y >/dev/null 2>&1 || true
+  npm install --no-audit --no-fund snarkjs@0.7.6 >/dev/null
+  cd /src
+  SNARKJS="node /tmp/snarkjs-local/node_modules/snarkjs/cli.js"
+fi
+$SNARKJS --version 2>/dev/null | head -1 || true
+echo "circomlib + snarkjs ready"
 
 echo "### 2. Compile circuit (reuse Groth16 build if present)"
 if [ ! -f build/DonationVerifier.r1cs ]; then

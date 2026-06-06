@@ -28,10 +28,10 @@ describe("Phase 0b: Real on-chain PLONK verification gas", function () {
     const network = await hre.network.connect();
     ethers = network.ethers;
 
-    // calldata.txt is snarkjs's soliditycalldata output:
-    //   ["0x..", ...24 proof words], ["0x.." public signals]
+    // calldata.txt is snarkjs's soliditycalldata output: two adjacent JSON
+    // arrays (no separator): ["0x..", ...24 proof words]["0x.." publics]
     const raw = readFileSync(join(plonkDir, "calldata.txt"), "utf8").trim();
-    const parsed = JSON.parse(`[${raw}]`);
+    const parsed = JSON.parse(`[${raw.replace(/\]\s*\[/g, "],[")}]`);
     [proofCalldata, pubSignals] = parsed;
     expect(proofCalldata).to.have.lengthOf(24); // 9 G1 points + 6 evaluations
 

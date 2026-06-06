@@ -75,7 +75,7 @@ done
 echo "### 6. Public output (computed Merkle root — compare to build/input.json merkleRoot)"
 ls target/
 echo "public_inputs (hex):"
-xxd -p target/public_inputs | tr -d '\n'; echo
+od -A n -t x1 target/public_inputs | tr -d ' \n'; echo
 
 echo "### 7. Artifact sizes"
 ls -l target/proof target/vk target/public_inputs target/donation_verifier.json

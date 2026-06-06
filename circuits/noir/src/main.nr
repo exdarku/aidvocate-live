@@ -3,9 +3,9 @@
 // salt whose Poseidon(5) commitment sits in a Merkle tree under a public root.
 //
 // Deviation (documented in the benchmark design): the computed root is
-// RETURNED as a public output rather than asserted against a public input —
-// semantically identical binding, and robust to Poseidon-constant differences
-// across stdlib implementations when preparing inputs.
+// RETURNED as a public output rather than asserted against a public input,
+// a semantically identical binding that is robust to Poseidon-constant
+// differences across stdlib implementations when preparing inputs.
 use poseidon::poseidon::bn254;
 
 fn main(

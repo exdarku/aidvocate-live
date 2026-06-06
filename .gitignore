@@ -86,3 +86,9 @@ circuits/build/
 # Misc
 *.pem
 .vercel
+
+# ZK benchmark artifacts
+circuits/ptau/
+circuits/noir/target/
+circuits/abi.json
+circuits/out.wtns
