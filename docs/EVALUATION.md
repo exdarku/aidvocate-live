@@ -126,11 +126,21 @@ Construction is **linear in batch size** and modest — a full 1,024-donation ba
 | Prove | ~3.6 s | ~21.1 s | ~238 ms | ~170 ms* |
 | Verify (CLI) | ~2.9 s | ~1.23 s | ~55 ms | ~17 ms |
 | Proof size | 807 B | 2,245 B | 849 B | 14,080 B |
-| **On-chain verify gas** | **218,720** (via AidVocate) | **293,366** (bare verifier) | not measured | not measured |
+| **On-chain verify gas** | **218,720** (via AidVocate) | **293,366** (bare verifier) | **234,529** (bare verifier) | **2,385,342** (bare verifier) |
 
 \* First Noir prove run was 3,967 ms (one-time SRS download); warm-run mean reported.
 
-Notes: (1) emulated-container timings are conservative upper bounds and not directly comparable to the native-arm64 Noir run; gas, constraint counts, and proof sizes are platform-independent. (2) All three ports compute the **identical Merkle root** to the Circom circuit — the ZoKrates stdlib and noir-lang/poseidon implementations are circomlib-compatible. (3) PLONK's universal setup avoids the per-circuit ceremony (F1) but costs ~2.8× proof size and ~34% more verification gas than Groth16 — consistent with the design choice of Groth16 for the production stack. (4) The PLONK verifier was deployed and exercised on-chain (`contracts/test/plonk-verify.test.js`): valid proof accepted, tampered public signal rejected.
+All four verifiers were deployed and exercised on-chain (`contracts/test/{onchain,plonk,zokrates,honk}-verify.test.js`): valid proof accepted, tampered public signal rejected, in every framework. The UltraHonk EVM verifier requires a keccak-transcript proof (`bb prove --oracle_hash keccak`, pipeline stage 6); its 2.39M gas (≈10.9× Groth16) is structural — Honk proofs trade verifier cost for prover speed and no trusted setup.
+
+Notes: (1) emulated-container timings are conservative upper bounds and not directly comparable to the native-arm64 Noir run; gas, constraint counts, and proof sizes are platform-independent. (2) All three ports compute the **identical Merkle root** to the Circom circuit — the ZoKrates stdlib and noir-lang/poseidon implementations are circomlib-compatible. (3) PLONK's universal setup avoids the per-circuit ceremony (F1) but costs ~2.8× proof size and ~34% more verification gas than Groth16 — consistent with the design choice of Groth16 for the production stack.
+
+#### Weight-sensitivity analysis (`contracts/scripts/weight-sensitivity.js`)
+
+The multi-criteria rankings were stress-tested across all 969 weight combinations on a 0.05 grid, ±0.10 single-weight perturbations, and per-metric flip thresholds:
+
+- **Hash selection:** Poseidon ranks #1 in **86.1%** of all possible weightings and under every ±0.10 perturbation; it is only overtaken (by Keccak256) when security maturity alone carries ≥ **0.60** of the total weight — a weighting inconsistent with the client-side proving requirement, since Keccak's ~150k constraints make donor-device proving infeasible.
+- **Proving-system selection:** with verification gas measured for **all four** combinations, a Groth16 framework ranks #1 in **100%** of weightings (both with this run's timings and the original benchmark's timings). The Groth16-over-PLONK/UltraHonk conclusion is insensitive to the weights.
+- **Framework tiebreak (transparency):** on the weighted benchmarks alone, ZoKrates+Groth16 now edges out Circom+Groth16 (its score was previously incomplete with unmeasured gas — a possibility the benchmark write-up explicitly flagged). Circom remains the selected framework on the two hard requirements outside the weighted model: **browser-based client-side proving** (donor-controlled verification; ZoKrates' browser support is limited) and **active maintenance** (ZoKrates has been dormant since ~2023). This rationale is requirement-driven, not weight-driven, and should be stated as such.
 
 ---
 

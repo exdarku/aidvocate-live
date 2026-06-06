@@ -4,9 +4,23 @@ import { defineConfig } from "hardhat/config";
 export default defineConfig({
   plugins: [hardhatToolboxMochaEthers],
   solidity: {
-    version: "0.8.20",
-    settings: {
-      optimizer: { enabled: true, runs: 200 }
+    compilers: [
+      {
+        version: "0.8.20",
+        settings: {
+          optimizer: { enabled: true, runs: 200 }
+        }
+      }
+    ],
+    overrides: {
+      // bb-generated UltraHonk verifier requires >=0.8.27; everything else
+      // stays on the evaluated 0.8.20 toolchain.
+      "contracts/HonkVerifierFresh.sol": {
+        version: "0.8.28",
+        settings: {
+          optimizer: { enabled: true, runs: 200 }
+        }
+      }
     }
   },
   networks: {

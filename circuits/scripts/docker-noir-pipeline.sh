@@ -72,11 +72,25 @@ for i in 1 2 3 4 5; do
   echo "verify_run_${i}_ms=$(( (E - S) / 1000000 ))"
 done
 
-echo "### 6. Public output (computed Merkle root — compare to build/input.json merkleRoot)"
+echo "### 6. EVM artifacts: keccak-transcript proof + Solidity verifier"
+# On-chain verification needs a keccak transcript (the default proves with a
+# Poseidon-flavored oracle for cheap recursion, which the EVM verifier does
+# not accept). Re-prove with --oracle_hash keccak and export HonkVerifier.sol.
+mkdir -p target/keccak
+bb prove --scheme ultra_honk --oracle_hash keccak -b target/donation_verifier.json -w target/witness.gz -o target/keccak/ >/dev/null
+bb write_vk --scheme ultra_honk --oracle_hash keccak -b target/donation_verifier.json -o target/keccak/ >/dev/null
+bb verify --scheme ultra_honk --oracle_hash keccak -k target/keccak/vk -p target/keccak/proof -i target/keccak/public_inputs
+if ! bb write_solidity_verifier --scheme ultra_honk -k target/keccak/vk -o target/keccak/HonkVerifier.sol; then
+  echo "write_solidity_verifier unavailable; trying legacy command"
+  bb contract_ultra_honk -k target/keccak/vk -o target/keccak/HonkVerifier.sol
+fi
+ls -l target/keccak/
+
+echo "### 7. Public output (computed Merkle root — compare to build/input.json merkleRoot)"
 ls target/
 echo "public_inputs (hex):"
 od -A n -t x1 target/public_inputs | tr -d ' \n'; echo
 
-echo "### 7. Artifact sizes"
+echo "### 8. Artifact sizes"
 ls -l target/proof target/vk target/public_inputs target/donation_verifier.json
 echo "ALL DONE"

@@ -65,9 +65,13 @@ for i in 1 2 3 4 5; do
   echo "verify_run_${i}_ms=$(( (E - S) / 1000000 ))"
 done
 
-echo "### 6. Public output (computed Merkle root — compare to build/input.json merkleRoot)"
+echo "### 6. Export Solidity verifier (for the on-chain gas test)"
+$ZOKRATES export-verifier -i "$OUT/verification.key" -o "$OUT/verifier.sol"
+ls -lh "$OUT/verifier.sol"
+
+echo "### 7. Public output (computed Merkle root — compare to build/input.json merkleRoot)"
 grep -A4 '"inputs"' "$OUT/proof.json" || true
 
-echo "### 7. Artifact sizes"
+echo "### 8. Artifact sizes"
 ls -lh "$OUT/out" "$OUT/proving.key" "$OUT/verification.key" "$OUT/proof.json" "$OUT/witness"
 echo "ALL DONE"
