@@ -17,15 +17,22 @@
 | Host | macOS (Apple Silicon, arm64), Node.js v24.10.0 |
 | Contracts | Hardhat 3.1.10, Solidity 0.8.20 (optimizer on, 200 runs), Mocha + Chai + ethers v6 |
 | Circuit | Circom 2.1.9, Groth16 over BN254, snarkjs 0.7.6, circomlib 2.0.5 |
-| Trusted setup | Powers-of-Tau `powersOfTau28_hez_final_14` (2^14), single Phase-2 contribution |
+| Trusted setup | Powers-of-Tau `powersOfTau28_hez_final_14` (2^14) for Groth16; `_16` (2^16) for PLONK; single Phase-2 contribution |
 | Static analysis | Slither 0.11.5 (solc 0.8.20), Circomspect 0.9.0 |
-| Containers | Docker 29.0.1 — `trailofbits/eth-security-toolbox` (Slither), `node:20-bookworm` (circom/snarkjs, linux/amd64 emulated), `rust:1-slim-bookworm` (Circomspect, native arm64) |
+| Containers | Docker 29.0.1 — `trailofbits/eth-security-toolbox` (Slither), `node:20-bookworm` (circom/snarkjs, linux/amd64 emulated), `rust:1-slim-bookworm` (Circomspect, native arm64), `ubuntu:24.04` (nargo/bb, native arm64) |
+| Extra solc | 0.8.28 for the bb-generated UltraHonk verifier only (pragma >=0.8.27); all project contracts stay on 0.8.20 |
+
+> **Background — the two-phase Groth16 setup.** Groth16's trusted setup has two phases. **Phase 1 ("Powers of Tau")** is *circuit-independent*: a public multi-party ceremony produces a structured reference string of elliptic-curve points encoding powers of a secret τ; it is safe as long as at least one contributor destroyed their randomness. This evaluation does not run Phase 1 — it downloads the public **Hermez ceremony** files (`powersOfTau28_hez_final_14/16.ptau`; the suffix is the supported circuit size, 2^14 = 16,384 constraints / 2^16 = 65,536). **Phase 2** specializes Phase 1's output to one specific circuit, producing the proving key (`.zkey`) — this is the per-circuit ceremony that finding **F1** concerns, because here it used a single contribution with public entropy. PLONK has no Phase 2 ("universal setup"): it consumes the Powers-of-Tau directly, but needs a larger one because its row count exceeds the R1CS constraint count (32,063 rows vs 2,751 R1CS for this circuit — hence `pot16`).
 
 **Reproducibility — scripts added by this evaluation:**
 - `contracts/scripts/benchmark-merkle.js` — Merkle construction benchmark across batch sizes.
+- `contracts/scripts/weight-sensitivity.js` — weight-sensitivity analysis of the multi-criteria rankings (§3.5).
 - `circuits/scripts/gen-input.js` — generates a valid proof input (`build/input.json`).
-- `circuits/scripts/docker-zk-pipeline.sh` — compile → trusted setup → witness → prove → verify (timed) in Docker.
-- `contracts/test/onchain-verify.test.js` — deploys the real Groth16 verifier and measures `verifyDonation` gas (skips if ZK artifacts are absent).
+- `circuits/scripts/gen-toolchain-inputs.js` — derives ZoKrates args / Noir `Prover.toml` from `input.json`.
+- `circuits/scripts/docker-zk-pipeline.sh` — Circom+Groth16: compile → trusted setup → witness → prove → verify (timed) in Docker.
+- `circuits/scripts/docker-plonk-pipeline.sh` — Circom+PLONK: universal setup → prove → verify (timed) + Solidity verifier export.
+- `circuits/scripts/docker-zokrates-pipeline.sh` / `docker-noir-pipeline.sh` — ZoKrates and Noir/UltraHonk ports (timed) + Solidity verifier exports.
+- `contracts/test/{onchain,plonk,zokrates,honk}-verify.test.js` — deploy each real verifier and measure verification gas (each skips if its artifacts are absent).
 
 > **Timing caveat.** The circuit pipeline ran inside a linux/amd64 container under QEMU emulation on arm64. Witness/proof/verify wall-clock times below are therefore **conservative upper bounds**; native execution is materially faster. On-chain gas and constraint counts are exact and platform-independent.
 
@@ -33,14 +40,15 @@
 
 ## 2. Functional Testing — correctness
 
-End-to-end correctness was verified at three layers; **all 23 contract tests pass** plus off-chain proof verification.
+End-to-end correctness was verified at three layers; **all 33 contract tests pass** plus off-chain proof verification.
 
 | Layer | What was checked | Result |
 |---|---|---|
 | Off-chain crypto | Poseidon commitment determinism, Merkle tree build, proof for a valid member | ✅ TC-01…TC-06 pass |
-| ZK proof (snarkjs) | Witness generation + Groth16 prove + `groth16 verify` of the generated proof | ✅ `snarkjs ... OK!` |
-| On-chain (mock) | Root storage, event emission, access control, mismatched-root rejection | ✅ TC-07…TC-10 pass |
+| ZK proof (snarkjs) | Witness generation + Groth16 prove + `groth16 verify` of the generated proof; TC-07 asserts the compiled-circuit and proof artifacts | ✅ `snarkjs ... OK!`, TC-07 pass |
+| On-chain (mock) | Root storage, event emission, access control, mismatched-root rejection | ✅ TC-08…TC-10 pass |
 | **On-chain (real Groth16)** | Deployed the actual verifier, submitted a real proof → `verifyDonation` returns **true**; a tampered public signal **reverts** | ✅ pass |
+| **On-chain (PLONK / ZoKrates / UltraHonk)** | Each framework's exported verifier deployed; real proof accepted, tampered public signal rejected (§3.5) | ✅ pass |
 
 Negative paths behave correctly: invalid commitments are rejected (TC-04), tampered donation data is detected (TC-05), non-owners cannot store roots (TC-10), verification against a non-existent batch reverts, and a public signal that does not match the stored root reverts (`"Public signal does not match stored root"`, `AidVocate.sol:49`).
 
@@ -92,7 +100,7 @@ The circuit is **fixed at Merkle depth 10 (≤ 1024 donations per batch)**, so c
 
 **Rough cost on Polygon** (≈30 gwei, MATIC ≈ $0.50, illustrative only — gas price is volatile): storing a root ≈ $0.001; an on-chain verification ≈ $0.003. Effectively negligible per batch.
 
-> **Correction to the existing test.** `contracts/test/scalability.test.js` labels root storage as "~22,000 gas constant" and computes a "99.9% savings" from an assumed 22,000 gas/donation. The **measured** transaction cost is ~53–70k gas. The *qualitative* claim is sound and important — **on-chain cost is constant per batch (O(1)) rather than linear in the number of donations (O(N))** — but the specific 22,000 figure is illustrative, not measured. The report uses the measured numbers.
+> **Note (resolved 2026-06-06).** `contracts/test/scalability.test.js` previously labeled root storage as "~22,000 gas constant" and derived a "99.9% savings" from that assumed figure; the test now measures `storeMerkleRoot` gas in-test and computes the savings from measured data (same 99.9% result for a 1,000-donation batch, since the ratio is (N−1)/N regardless of the per-write cost). The 22,000 figure was only the cold-SSTORE component; the full transaction costs 53–70k gas as above.
 
 ### 3.4 Off-chain Merkle construction (native, host)
 
@@ -224,4 +232,18 @@ cd ../contracts && docker run --rm -v "$PWD":/src -w /src trailofbits/eth-securi
 cd ../circuits && docker run --rm -v "$PWD":/src -w /src rust:1-slim-bookworm \
   bash -c 'export PATH=/usr/local/cargo/bin:$PATH; cargo install circomspect; \
   circomspect -L node_modules circuits/DonationVerifier.circom'
+
+# Cross-toolchain benchmark (section 3.5)
+cd ../circuits && node scripts/gen-toolchain-inputs.js
+docker run --rm --platform linux/amd64 -v "$PWD":/src -w /src node:20-bookworm \
+  bash /src/scripts/docker-plonk-pipeline.sh
+docker run --rm --platform linux/amd64 -v "$PWD":/src -w /src zokrates/zokrates:0.8.8 \
+  bash /src/scripts/docker-zokrates-pipeline.sh
+docker run --rm -v "$PWD":/src -w /src/noir ubuntu:24.04 \
+  bash /src/scripts/docker-noir-pipeline.sh
+# then copy each exported verifier into contracts/contracts/ (renamed *Fresh)
+# and re-run: cd ../contracts && npx hardhat test
+
+# Weight-sensitivity analysis
+cd ../contracts && node scripts/weight-sensitivity.js
 ```
