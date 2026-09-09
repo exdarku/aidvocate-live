@@ -1,0 +1,13 @@
+# Shell scripts must keep LF endings. On Windows checkouts Git's autocrlf
+# conversion would otherwise rewrite them to CRLF, and bash inside the Docker
+# container then reads the trailing \r as part of each command — the scripts
+# fail with errors such as "-l: command not found" and "$'\r': command not
+# found", after which they can still print their success message while having
+# produced nothing.
+*.sh text eol=lf
+
+# Same reasoning for the circuit and toolchain inputs consumed inside Linux
+# containers.
+*.circom text eol=lf
+*.zok text eol=lf
+Dockerfile text eol=lf
