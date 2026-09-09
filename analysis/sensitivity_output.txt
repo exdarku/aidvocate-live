@@ -1,0 +1,35 @@
+
+=== HASH FUNCTIONS ===
+Baseline composite scores (weights fixed before testing):
+  Poseidon               0.9386
+  Pedersen               0.7308
+  MiMC                   0.5879
+  Keccak256              0.5714
+
+Ranking stability over 969 weight vectors:
+  Candidate                  R1     R2     R3     R4
+  Poseidon                  834    125     10      0
+  Pedersen                    4    379    313    273
+  MiMC                        0    175    403    391
+  Keccak256                 131    290    243    305
+  Poseidon: rank 1 in 834/969 (86.1%), mean margin 0.1247, top-2 in 959
+  Pedersen: rank 1 in 4/969 (0.4%), mean margin 0.0078, top-2 in 383
+  Keccak256: rank 1 in 131/969 (13.5%), mean margin 0.0638, top-2 in 421
+
+=== FRAMEWORKS ===
+Baseline composite scores (weights fixed before testing):
+  ZoKrates + Groth16     0.9966
+  Circom + Groth16       0.8850
+  Circom + PLONK         0.6411
+  Noir + UltraHonk       0.2982
+
+Ranking stability over 969 weight vectors:
+  Candidate                  R1     R2     R3     R4
+  ZoKrates + Groth16        969      0      0      0
+  Circom + Groth16            0    795    174      0
+  Circom + PLONK              0    174    675    120
+  Noir + UltraHonk            0      0    120    849
+  ZoKrates + Groth16: rank 1 in 969/969 (100.0%), mean margin 0.1219, top-2 in 969
+
+Poseidon is not first in 135 vectors. The smallest combined weight on (native gas + security maturity) among those is 0.45.
+Poseidon is first in all 364 vectors with that combined weight below 0.45 (0 exceptions).

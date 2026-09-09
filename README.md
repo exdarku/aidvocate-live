@@ -189,7 +189,7 @@ Everything runs inside Docker — nothing gets installed on your machine except 
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url> && cd aidvocate
+git clone https://github.com/exdarku/aidvocate-live.git && cd aidvocate-live
 
 # 2. Build the Docker image (installs Circom, snarkjs, ZoKrates, Noir, Slither, etc.)
 docker compose build
@@ -274,9 +274,46 @@ Then open http://localhost:5173 in your browser.
 
 ---
 
+## Repository
+
+    https://github.com/exdarku/aidvocate-live
+
 ## Documentation
 
-- **[Developer Guide](docs/guide/DEVELOPER_GUIDE.md)** — Detailed setup, architecture explanation, and how each component maps to thesis concepts
-- **[System Overview](docs/overview/OVERVIEW.md)** — Plain-English overview for non-technical readers (thesis panel)
-- **[Security Report](docs/security/SECURITY_REPORT.md)** — Full security analysis with Slither + Circomspect findings
-- **[Design Document](docs/plans/2026-03-03-aidvocate-design.md)** — System architecture and design decisions
+- **[Evaluation Report](docs/EVALUATION.md)** — Full security and functional evaluation, including open findings (F1–F8) and their recommendations
+- **[Testing Explanation](docs/TESTING-EXPLANATION.md)** — Technical walkthrough mapping every test and script to the claims it supports
+- **[ZK Toolchain Benchmark Design](docs/superpowers/specs/2026-06-04-zk-toolchain-benchmark-design.md)** — Methodology for the hash-function and framework benchmarks
+- **[Paper Alignment Design](docs/superpowers/specs/2026-06-06-paper-alignment-design.md)** — How the implementation maps to the reported results
+
+## Trusted setup ceremony
+
+The Groth16 Phase 2 setup transcript is published in
+**[ceremony/transcript.md](ceremony/transcript.md)**, with the raw
+`snarkjs zkey verify` output in `ceremony/zkey_verify_output.txt`.
+
+The Phase 2 setup has **one contribution** and **no public randomness beacon**, and
+its entropy string is hardcoded in `circuits/scripts/trusted-setup.sh`. This is a
+known limitation recorded as finding F1 in the evaluation report: the setup is
+suitable for development, benchmarking, and testnet use, but a production
+deployment requires a genuine multi-party ceremony. Phase 1 uses the public
+perpetual Powers of Tau (`powersOfTau28_hez_final_14`).
+
+## Reproducing the selection analysis (Tables 1, 2 and 3)
+
+`analysis/sensitivity_analysis.py` reproduces the Weighted-Sum Model composite
+scores and the weight-sensitivity sweep reported in the paper:
+
+- **Table 1** — hash-function composite scores (Poseidon, Pedersen, MiMC, Keccak256)
+- **Table 2** — framework composite scores (ZoKrates+Groth16, Circom+Groth16,
+  Circom+PLONK, Noir+UltraHonk)
+- **Table 3** — ranking stability over all 969 admissible weight vectors in which
+  the four weights are multiples of 0.05, each at least 0.05, and sum to 1.00
+
+```bash
+python analysis/sensitivity_analysis.py
+```
+
+The script applies the scoring model to the measured values recorded in the
+benchmark documents; it performs no measurement itself, so it is deterministic and
+needs only the Python standard library. Captured output is in
+`analysis/sensitivity_output.txt`.
