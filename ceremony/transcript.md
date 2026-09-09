@@ -84,10 +84,10 @@ Reproduce with:
 Captured output is in `zkey_verify_output.txt`. The contribution chain is:
 
     contribution #1 AidVocate Phase 2 contribution:
-        5e456c06 3126c4e8 93fffeb0 ebb2f03d
-        30a222a6 ec0be614 65049962 6eef3edc
-        11bc18c2 67a314a1 16d2cc16 2e8f0d64
-        16f12436 d37c74ab e1d048e7 31869235
+        e19edb71 8ef68285 95021330 e167d3f1
+        8b69f842 82d59299 eb898a28 02c1574b
+        7bcae61d d2c89b3a b362cc64 32de5df2
+        4adcf009 88b42616 39982497 be725629
 
     ZKey Ok!
 
@@ -122,10 +122,15 @@ above identifies this specific run, not every run of the script.
 
 ## Artifact hashes (SHA-256) for this run
 
-    ee19997b0a22d4deb31e47d1a84ddc84e06b9294cf4d38978e1e03fa8379cf17  circuits/build/DonationVerifier.zkey
+    9d8cb619e92b680bccd3e44662b80aca2a67185038856d1d35b45cfa1be7021a  circuits/build/DonationVerifier.zkey
     89dcfceaa6b57de5d09b9877cb9110dead668a2e0331473935703e4f07bed849  circuits/build/DonationVerifier_0000.zkey
     5a9411321d42ee9a5afa394e2b6c764c97b9238692ca0b660b68030eb67c69cf  circuits/build/DonationVerifier.r1cs
     489be9e5ac65d524f7b1685baac8a183c6e77924fdb73d2b8105e335f277895d  circuits/ptau/pot14.ptau
+
+The `.r1cs` and the pre-contribution `DonationVerifier_0000.zkey` are
+deterministic: they reproduce byte-for-byte from the same circuit and ptau. Only
+the final `.zkey` and its contribution hash differ between runs, for the reason
+given above.
 
 Generated 2026-09-09 on the pinned `aidvocate/circom-toolchain` image
 (circom 2.2.2, snarkjs 0.7.6, node 20).

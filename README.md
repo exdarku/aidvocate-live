@@ -197,16 +197,26 @@ docker compose build
 # 3. Enter the container
 docker compose run --rm dev bash
 
-# 4. Install dependencies
-pnpm install
+# 4. Install dependencies (installs client, server, contracts and circuits)
+npm run install:all
 ```
+
+> **Note on `contracts/`.** `hardhat-gas-reporter@2.3.0` declares a peer
+> dependency on `hardhat@^2.16.0` while the project uses `hardhat@3.x`, so a
+> plain `npm install` in `contracts/` fails with `ERESOLVE`. Install that
+> workspace with `npm install --legacy-peer-deps`. The test suite runs correctly
+> once installed.
 
 ### Running Things
 
 All commands below run **inside the Docker container**.
 
 ```bash
-# Run smart contract tests (20 tests)
+# Run smart contract tests
+# On a fresh clone: 23 passing, 10 pending. The 10 pending tests verify real
+# Groth16/PLONK/UltraHonk/ZoKrates proofs on-chain and self-skip until the
+# proving artifacts exist, because circuits/build/ is gitignored. Run the
+# circuit pipeline below first to enable them.
 cd packages/contracts && npx hardhat test
 
 # Start the backend API (port 3001)

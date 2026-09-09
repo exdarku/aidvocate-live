@@ -15,9 +15,9 @@
 		86002d8b 20d7af10 80ea7aa2 b5cce1f7
 [INFO]  snarkJS: -------------------------
 [INFO]  snarkJS: contribution #1 AidVocate Phase 2 contribution:
-		5e456c06 3126c4e8 93fffeb0 ebb2f03d
-		30a222a6 ec0be614 65049962 6eef3edc
-		11bc18c2 67a314a1 16d2cc16 2e8f0d64
-		16f12436 d37c74ab e1d048e7 31869235
+		e19edb71 8ef68285 95021330 e167d3f1
+		8b69f842 82d59299 eb898a28 02c1574b
+		7bcae61d d2c89b3a b362cc64 32de5df2
+		4adcf009 88b42616 39982497 be725629
 [INFO]  snarkJS: -------------------------
 [INFO]  snarkJS: ZKey Ok!
