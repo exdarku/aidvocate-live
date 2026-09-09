@@ -1,10 +1,11 @@
 // Generate a valid proof input (build/input.json) for DonationVerifier (depth 10).
 // Places the donation commitment at leaf index 0 of an otherwise-empty tree and
 // derives the Merkle path + root using the SAME Poseidon(2) the circuit uses.
-// Run from circuits/ with circomlibjs resolvable (we point NODE_PATH at contracts).
-import pkg from "/Users/laurence/Documents/School/AWS/Capstone/AidVocate/contracts/node_modules/circomlibjs/build/main.cjs";
-const { buildPoseidon } = pkg;
+// Run from circuits/ (npm install there first, so circomlibjs resolves).
+import { buildPoseidon } from "circomlibjs";
 import { writeFileSync, mkdirSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 const poseidon = await buildPoseidon();
 const F = poseidon.F;
@@ -50,7 +51,7 @@ const input = {
   merkleRoot,
 };
 
-const outDir = "/Users/laurence/Documents/School/AWS/Capstone/AidVocate/circuits/build";
+const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "build");
 mkdirSync(outDir, { recursive: true });
 writeFileSync(`${outDir}/input.json`, JSON.stringify(input, null, 2));
 console.log("commitment =", commitment);
